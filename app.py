@@ -84,6 +84,8 @@ def health():
 
 
 if __name__ == '__main__':
+    import os
+    
     print("="*60)
     print("ORION-EYE System Starting")
     print("Simulated Onboard AI for Debris Avoidance")
@@ -95,4 +97,6 @@ if __name__ == '__main__':
     print("  3. Multiple Objects - Complex scenario")
     print("\n" + "="*60)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use debug mode only in development (not in production)
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
