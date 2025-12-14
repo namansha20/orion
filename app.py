@@ -114,7 +114,12 @@ def generate_camera_frames():
     pos_pts = deque(maxlen=BUFFER_SIZE)
     rad_pts = deque(maxlen=BUFFER_SIZE)
     
-    while camera_active:
+    while True:
+        # Check camera_active with lock
+        with camera_lock:
+            if not camera_active:
+                break
+        
         success, frame = camera.read()
         if not success:
             break
@@ -214,6 +219,9 @@ def generate_camera_frames():
         
         # Encode frame to JPEG
         ret, buffer = cv2.imencode('.jpg', frame)
+        if not ret:
+            continue  # Skip this frame if encoding failed
+        
         frame_bytes = buffer.tobytes()
         
         yield (b'--frame\r\n'
@@ -227,7 +235,12 @@ def generate_camera_frames():
 
 @app.route('/api/camera/start')
 def start_camera():
-    """Start camera detection"""
+    """
+    Start camera detection
+    Note: Camera initialization happens lazily in generate_camera_frames()
+    when the /api/camera/feed endpoint is accessed. This endpoint just
+    signals that the camera should be active.
+    """
     global camera_active
     with camera_lock:
         if camera_active:
