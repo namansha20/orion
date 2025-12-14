@@ -282,8 +282,26 @@ ORION now includes **AADES** (Autonomous Avoidance and Detection System) - a rea
 - **Collision prediction** with visual warnings
 - **Trajectory visualization** with trailing effects
 - **HUD interface** with status indicators
+- **Web-based live camera preview** integrated in the dashboard
 
 ### Running Camera Detection
+
+**Option 1: Integrated Web Dashboard (Recommended)**
+
+Access the live camera detection preview directly from the web dashboard:
+
+1. Start the web application:
+```bash
+python app.py
+```
+
+2. Open your browser and navigate to `http://localhost:5000`
+
+3. Click the **"📹 Start Live Camera Detection"** button
+
+4. The camera preview will appear with real-time debris detection overlay
+
+**Option 2: Standalone Camera Application**
 
 ```bash
 # Run the camera detection system

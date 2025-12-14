@@ -74,6 +74,15 @@
             color: white;
         }
         
+        .btn-camera {
+            background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%);
+            color: white;
+        }
+        
+        .btn-camera.active {
+            background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
@@ -351,6 +360,9 @@
         <button class="btn btn-multi" onclick="runSimulation('multi')">
             Demo 3: Multiple Objects
         </button>
+        <button class="btn btn-camera" id="camera-btn" onclick="toggleCamera()">
+            📹 Start Live Camera Detection
+        </button>
     </div>
     
     <div id="results" style="display: none;">
@@ -439,6 +451,23 @@
     <div id="loading" class="loading" style="display: none;">
         <div class="spinner"></div>
         <div>Running ORION-EYE Simulation...</div>
+    </div>
+    
+    <div id="camera-preview" class="panel" style="display: none; margin-top: 20px; max-width: 1200px; margin-left: auto; margin-right: auto;">
+        <h2>📹 Live Camera Debris Detection Preview</h2>
+        <div style="text-align: center; background: #000; border-radius: 8px; padding: 10px;">
+            <img id="camera-stream" src="" alt="Camera Feed" style="max-width: 100%; border-radius: 8px;">
+        </div>
+        <div style="margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px;">
+            <h3 style="color: #64b5f6; margin-bottom: 10px;">How to Use:</h3>
+            <ul style="color: #e0e0e0; line-height: 1.8;">
+                <li>🔴 Point a red object at your camera to test debris detection</li>
+                <li>📍 The system tracks object position in 3D space (X, Y, Z axes)</li>
+                <li>⚠️ Collision warnings appear when object approaches center zone</li>
+                <li>🎯 Trajectory trails show object movement history</li>
+                <li>💡 Move object closer/farther to trigger Z-axis detection</li>
+            </ul>
+        </div>
     </div>
     
     <script>
@@ -676,6 +705,42 @@
             ctx.arc(centerX, centerY, 5 * scale, 0, Math.PI * 2);
             ctx.stroke();
             ctx.setLineDash([]);
+        }
+        
+        // Camera control functions
+        let cameraActive = false;
+        
+        async function toggleCamera() {
+            const btn = document.getElementById('camera-btn');
+            const preview = document.getElementById('camera-preview');
+            const stream = document.getElementById('camera-stream');
+            
+            if (!cameraActive) {
+                // Start camera
+                try {
+                    await fetch('/api/camera/start');
+                    stream.src = '/api/camera/feed?' + new Date().getTime();
+                    preview.style.display = 'block';
+                    btn.textContent = '📹 Stop Camera Detection';
+                    btn.classList.add('active');
+                    cameraActive = true;
+                } catch (error) {
+                    console.error('Error starting camera:', error);
+                    alert('Failed to start camera. Please check if camera is available.');
+                }
+            } else {
+                // Stop camera
+                try {
+                    await fetch('/api/camera/stop');
+                    stream.src = '';
+                    preview.style.display = 'none';
+                    btn.textContent = '📹 Start Live Camera Detection';
+                    btn.classList.remove('active');
+                    cameraActive = false;
+                } catch (error) {
+                    console.error('Error stopping camera:', error);
+                }
+            }
         }
         
         // Auto-run safe scenario on load

@@ -5,11 +5,26 @@ AADES (Autonomous Avoidance and Detection System) is a real-time camera-based ob
 
 ## Quick Start
 
+### Option 1: Web Dashboard (Recommended)
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the system
+# Run the web application
+python app.py
+
+# Open browser and go to http://localhost:5000
+# Click "📹 Start Live Camera Detection" button
+```
+
+### Option 2: Standalone Application
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the camera detection system
 python camera_detection.py
 
 # Press 'q' to quit
@@ -188,6 +203,22 @@ Both systems share similar concepts:
 - Trajectory prediction
 - Collision avoidance
 - Autonomous decision-making
+
+### Web Dashboard Integration
+
+The AADES camera detection is now integrated into the Orion web dashboard, providing:
+
+1. **Live Camera Preview**: Real-time video stream with detection overlay in the browser
+2. **One-Click Start/Stop**: Easy camera control with a single button
+3. **Seamless Integration**: Camera detection alongside simulation scenarios
+4. **Visual Instructions**: Built-in guide for using the camera detection feature
+5. **Browser Compatibility**: Works with modern web browsers supporting video streaming
+
+**How It Works:**
+- Flask backend streams camera frames via `/api/camera/feed` endpoint
+- Computer vision processing happens server-side using OpenCV
+- Processed frames with detection overlay are streamed to browser
+- JavaScript frontend handles camera control and display
 
 ## Requirements
 
