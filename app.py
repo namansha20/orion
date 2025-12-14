@@ -98,5 +98,6 @@ if __name__ == '__main__':
     print("\n" + "="*60)
     
     # Use debug mode only in development (not in production)
-    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    # Check FLASK_DEBUG for Flask 2.0+ compatibility
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
     app.run(debug=debug_mode, host='0.0.0.0', port=5000)

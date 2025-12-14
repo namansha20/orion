@@ -155,10 +155,16 @@ class Layer5_RiskCalculator:
         containing level, score, distance, time, and maneuver requirement flag.
         
         Args:
-            obj: Object dict with closest_approach data
+            obj: Object dict with closest_approach data. Must contain:
+                 - 'closest_approach': dict with 'distance' (float) and 'time' (float)
             
         Returns:
-            Object dict with added risk_assessment field
+            Object dict with added risk_assessment field containing:
+            - level: str (CRITICAL, HIGH, MEDIUM, or LOW)
+            - score: float (0.01-1.0)
+            - distance_at_closest: float (km)
+            - time_to_closest: float (seconds)
+            - requires_maneuver: bool
         """
         closest = obj['closest_approach']
         distance = closest['distance']
@@ -480,6 +486,10 @@ class Layer10_EdgeCaseHandler:
 class OrionEyeSystem:
     """Main ORION-EYE System Integration"""
     
+    # LEO Impact Constants
+    FUEL_COST_THRESHOLD = 50  # kg - threshold for mission impact assessment
+    LEO_SUSTAINABILITY_SCORE = 0.85  # Base sustainability score
+    
     def __init__(self):
         self.layer1 = Layer1_SpaceSensorSimulator()
         self.layer2 = Layer2_ObjectDetector()
@@ -575,14 +585,15 @@ class OrionEyeSystem:
     def _calculate_leo_impact(self, objects: List[Dict], maneuver: Dict) -> Dict:
         """Calculate impact on LEO environment"""
         debris_count = sum(1 for obj in objects if obj.get('classified_type') == 'debris')
+        fuel_cost = maneuver.get('fuel_cost', 0)
         
         impact = {
             'debris_encountered': debris_count,
             'collision_avoided': maneuver['maneuver_type'] != 'NONE',
-            'fuel_consumed': maneuver.get('fuel_cost', 0),
+            'fuel_consumed': fuel_cost,
             'orbital_debris_contribution': 0,  # No debris created by avoidance
-            'mission_impact': 'MINIMAL' if maneuver.get('fuel_cost', 0) < 50 else 'MODERATE',
-            'leo_sustainability_score': 0.85  # Positive impact by avoiding collision
+            'mission_impact': 'MINIMAL' if fuel_cost < self.FUEL_COST_THRESHOLD else 'MODERATE',
+            'leo_sustainability_score': self.LEO_SUSTAINABILITY_SCORE  # Positive impact by avoiding collision
         }
         
         return impact
