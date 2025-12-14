@@ -147,7 +147,19 @@ class Layer5_RiskCalculator:
         self.warning_distance = 10.0  # km
         
     def calculate_risk(self, obj: Dict) -> Dict:
-        """Calculate collision risk for an object"""
+        """Calculate collision risk for an object
+        
+        Evaluates collision probability based on closest approach distance and time.
+        Uses four-tier risk assessment: CRITICAL (<5km), HIGH (<10km), 
+        MEDIUM (<20km), LOW (>=20km). Returns object with added risk_assessment
+        containing level, score, distance, time, and maneuver requirement flag.
+        
+        Args:
+            obj: Object dict with closest_approach data
+            
+        Returns:
+            Object dict with added risk_assessment field
+        """
         closest = obj['closest_approach']
         distance = closest['distance']
         time_to_closest = closest['time']
@@ -248,8 +260,9 @@ class Layer7_ManeuverSimulator:
         relative_pos = threat_position - spacecraft_pos
         perpendicular = np.cross(threat_velocity, relative_pos)
         
-        if np.linalg.norm(perpendicular) > 0:
-            perpendicular = perpendicular / np.linalg.norm(perpendicular)
+        perp_magnitude = np.linalg.norm(perpendicular)
+        if perp_magnitude > 0:
+            perpendicular = perpendicular / perp_magnitude
         else:
             perpendicular = np.array([0, 0, 1])
         

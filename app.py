@@ -21,6 +21,21 @@ def index():
     return render_template('index.html')
 
 
+def convert_numpy(obj):
+    """Convert numpy types to Python native types for JSON serialization"""
+    import numpy as np
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (np.integer, np.floating)):
+        return obj.item()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy(item) for item in obj]
+    else:
+        return obj
+
+
 @app.route('/api/simulate', methods=['POST'])
 def simulate():
     """Run simulation with specified scenario"""
@@ -29,8 +44,9 @@ def simulate():
     
     try:
         result = orion.run_simulation(scenario)
-        # Convert numpy arrays to lists for JSON serialization
-        return jsonify(json.loads(json.dumps(result, default=str)))
+        # Convert numpy arrays to native types for JSON serialization
+        result_clean = convert_numpy(result)
+        return jsonify(result_clean)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
