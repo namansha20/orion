@@ -16,7 +16,7 @@ UPPER_RED2 = np.array([180, 255, 255])
 
 # Tracking Physics
 BUFFER_SIZE = 32         # Length of the red trail
-PREDICTION_FRAMES = 15   # Length of the yellow prediction arrow
+PREDICTION_FRAMES = 15   # Length of the cyan prediction arrow
 COLLISION_ZONE = 80      # Radius of the "Satellite Body" (Center screen)
 GROWTH_THRESHOLD = 0.5   # Sensitivity for "Approaching" (Z-axis)
 MOVEMENT_THRESHOLD = 2   # Sensitivity for Left/Right movement
@@ -38,8 +38,9 @@ def calculate_dynamics(pos_history, radius_history):
     dy = int(dy_total / 9)
 
     # 2. Z Velocity (Optical Expansion/Growth)
-    r_now = np.mean(list(radius_history)[:5])
-    r_old = np.mean(list(radius_history)[-5:])
+    # For deque, index 0 is most recent, so [:5] are newest, [-5:] are oldest
+    r_now = np.mean(list(radius_history)[:5])  # Most recent 5 frames
+    r_old = np.mean(list(radius_history)[-5:])  # Oldest 5 frames
     growth_rate = r_now - r_old 
     
     return (dx, dy), growth_rate
@@ -133,7 +134,7 @@ def main():
                     cv2.line(frame, (int(x), int(y)), (center_x, center_y), (0, 0, 255), 3)
 
                 elif is_intercept and not is_approaching:
-                    status_color = (255, 100, 0) # Blue-ish
+                    status_color = (255, 100, 0) # Orange-ish (BGR format)
                     status_msg = "TRAJECTORY INTERSECT (SAFE - RECEDING)"
                 else:
                     status_color = (0, 255, 255) # Yellow
